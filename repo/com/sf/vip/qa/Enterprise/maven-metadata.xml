@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+  <groupId>com.sf.vip.qa</groupId>
+  <artifactId>Enterprise</artifactId>
+  <versioning>
+    <release>1.0</release>
+    <versions>
+      <version>1.0</version>
+    </versions>
+    <lastUpdated>20170602195022</lastUpdated>
+  </versioning>
+</metadata>
