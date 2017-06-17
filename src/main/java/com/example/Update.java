@@ -76,21 +76,9 @@ public class Update extends HttpServlet{
 	//public String parseXML(@QueryParam("xmlRecords") String xmlRecords) throws ParserConfigurationException {
 	public String parseXML(String xmlRecords , @Context ServletContext context) throws Exception {
 	String as = "";
-	//ServletContextEvent kj = new ServletContextEvent();
 	String pathPdf = context.getRealPath("/WEB-INF/Appraisal/");
-	// getServlet().getServletContext().getRealPath("/WEB-INF/mailpdf/" + "appraisal.pdf");
 	System.out.println("pathpdf is :::::" + pathPdf);
-	
-	
-	
-	System.out.println("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-	
-	//System.out.println("xmlRecords" + xmlRecords);
 	String decodedValue = "";
-	String mismoPDF = "";
-	
-	
-	//xmlRecords = URLDecoder.decode(xmlRecords).trim();
 	
 	xmlRecords = xmlRecords.replace("%3C", "<");
 	xmlRecords = xmlRecords.replace("%3E", ">");
@@ -99,16 +87,7 @@ public class Update extends HttpServlet{
 	xmlRecords = xmlRecords.replace("%27", "\"");
 	xmlRecords = xmlRecords.replace("+", " ");
 	xmlRecords = xmlRecords.replace("%3A", ":");
-	//xmlRecords = xmlRecords.replaceAll("[^\\x20-\\x7e]", "");
-	
-	// System.out.println("xmlRecords after is ::" + xmlRecords);
-	
-	
-	
-	
-	/*DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-	DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-	Document createDoc = docBuilder.newDocument();*/
+
 	
 	Map<String, String> xmlDataMap = new HashMap<String, String>();
 	ConnectorConfig config = new ConnectorConfig();
@@ -118,7 +97,6 @@ public class Update extends HttpServlet{
 
 	try {
 	
-	//Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new InputSource(new StringReader(xml)));
 
 	connection = Connector.newConnection(config);
 
@@ -201,18 +179,7 @@ public class Update extends HttpServlet{
 	
 	}//end of if
 	
-	
 
-	//	System.out.println("xmlDataMap is " + xmlDataMap);
-	
-	// display some current settings
-	/*System.out.println("Auth EndPoint: " + config.getAuthEndpoint());
-	System.out.println("Service EndPoint: "
-	+ config.getServiceEndpoint());
-	System.out.println("Username: " + config.getUsername());
-	System.out.println("SessionId: " + config.getSessionId());
-	
-	System.out.println("**********************************");*/
 	
 
 	com.sforce.soap.SpearAppraisalAPI.SoapConnection soap = com.sforce.soap.SpearAppraisalAPI.Connector.newConnection("","");
@@ -236,16 +203,13 @@ String endpointurl=	config.getServiceEndpoint().split("/services")[0] ;
 	
 	//com.sforce.soap.SpearAppraisalAPI.OrderResponse response = soap.setMercuryNetworkStatus(xmlDataString);///caspers's code
 	com.sforce.soap.SpearAppraisalAPI.OrderResponse response = soap.setMercuryNetworkStatus(xmlString);
-	
 	System.out.println("xmlString :::::::::" + endpointurl); 
-	
-
-	
+	String mnNetworkId = response.getErrorDescription().split(" ")[6];
+	String mnResponse = createXMLForRsponse(mnNetworkId);
 	String caseid=response.getErrorDescription().split("&&")[1].split("&&")[0];
 	postChatter(endpointurl, caseid, config.getSessionId(),pathPdf );
-	
-	return response.getErrorDescription();
-	
+	//return response.getErrorDescription();
+	return mnResponse;
 	} // end of try
 	catch (Exception e) {
 	e.printStackTrace();
@@ -254,9 +218,6 @@ String endpointurl=	config.getServiceEndpoint().split("/services")[0] ;
 	e.printStackTrace(new PrintWriter(sw));
 	return sw.toString();
 	}
-
-	
-	//return xmlDataMap.toString();
 	}
 
 	public static String getCharacterDataFromElement(Element e) {
@@ -689,6 +650,32 @@ String endpointurl=	config.getServiceEndpoint().split("/services")[0] ;
 	ex.printStackTrace();
 	
 	}
+	}
+	
+	public String createXMLForRsponse(String mnnetworkId){
+		String returnResponse = "";
+		try{
+			Element rootElement = null;
+			 DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+			 DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+		     Document createdoc = docBuilder.newDocument();
+		     
+		     rootElement = createdoc.createElement("OrderResponse");
+		     
+		     Element resultElement = createdoc.createElement("Result");
+		     resultElement.appendChild(createdoc.createTextNode("true"));
+		     rootElement.appendChild(resultElement);
+		     
+		     Element errorDescElement = createdoc.createElement("ErrorDescription");
+		     errorDescElement.appendChild(createdoc.createTextNode("MN order status history id::"+mnnetworkId+"::--::::MISMO and AppraisalReport added successfully."));
+		     rootElement.appendChild(errorDescElement);
+		     
+		     createdoc.appendChild(rootElement);
+		     returnResponse = printXmlDocument(createdoc);
+		}catch(Exception ex){
+			ex.printStackTrace();
+		}
+		return returnResponse;
 	}
 	
 	
