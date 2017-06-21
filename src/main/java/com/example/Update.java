@@ -117,10 +117,18 @@ public class Update extends HttpServlet{
 				xmlDataMap.put("STATUSTIMESTAMP", getCharacterDataFromElement(statusTSElement));
 			}
 			
+			NodeList dueDateNode = doc.getElementsByTagName("DUEDATE");
+			if(dueDateNode.getLength() > 0){
+				Element dueDateElement = (Element) dueDateNode.item(0);
+				xmlDataMap.put("DUEDATE", getCharacterDataFromElement(dueDateElement));
+			}
+			
+			
+			
 			NodeList nodes = doc.getElementsByTagName("STATUSCOMMENT");
 			Element line1 = (Element) nodes.item(0);
 			xmlDataMap.put("STATUSCOMMENTTEXT", getCharacterDataFromElement(line1));
-			System.out.println("Statuscomment body is : " + getCharacterDataFromElement(line1));
+			//System.out.println("Statuscomment body is : " + getCharacterDataFromElement(line1));
 			
 			for (int i = 0; i < nodes.getLength(); i++) {
 			Element element = (Element) nodes.item(i);
@@ -132,19 +140,17 @@ public class Update extends HttpServlet{
 				//String attributeKey = currentItem.getAttributes().getNamedItem("Name").getNodeValue();
 				NodeList contentNodelist = docElement.getElementsByTagName("CONTENT");
 				
-				System.out.println("checking type is :::" + docElement.getAttribute("TYPE"));;
+				//System.out.println("checking type is :::" + docElement.getAttribute("TYPE"));;
 				
 				for(int k = 0;k < contentNodelist.getLength();k++){
 
 					Element contentElement = (Element) contentNodelist.item(k);
 					if(docElement.getAttribute("TYPE") != null && docElement.getAttribute("TYPE").contains("MISMO")){
-						System.out.println("111111");
 						decodedValue = decodeEncodedValue(getCharacterDataFromElement(contentElement).replace(" ", "+"));
 						//createXML(getCharacterDataFromElement(contentElement).replace(" ", "+"),pathPdf);
 					}
 					
 					if(docElement.getAttribute("TYPE") != null && docElement.getAttribute("TYPE").contains("Appraisal")){
-						System.out.println("2222222222");
 						//mismoPDF = decodeEncodedValue(getCharacterDataFromElement(contentElement).replace(" ", "+"));
 						createPDF(getCharacterDataFromElement(contentElement).replace(" ", "+"),pathPdf);
 					}
@@ -273,6 +279,15 @@ public class Update extends HttpServlet{
 	   	 statusTime.appendChild(doc.createTextNode(xmlDataMap.get("STATUSTIMESTAMP")));
 	   	 rootElement.appendChild(statusTime);
 	    }
+	    
+	    if(xmlDataMap.containsKey("DUEDATE")){
+		   	 Element dueDate = doc.createElement("DUEDATE");
+		   	 dueDate.appendChild(doc.createTextNode(xmlDataMap.get("DUEDATE")));
+		   	 rootElement.appendChild(dueDate);
+		    
+	    }
+	    
+	    
 		
 		Element statusCmnt = doc.createElement("STATUSCOMMENT");
 		if(xmlDataMap.containsKey("STATUSCOMMENTTEXT")){
@@ -298,12 +313,8 @@ public class Update extends HttpServlet{
 		retString = printXmlDocument(doc);
 		
 	}catch(Exception ex){
-	ex.printStackTrace();
+	   ex.printStackTrace();
 	}
-	
-	//&gt;&lt;
-	
-	//>PROPERTY<>
 	retString = retString.replace("&gt;", ">");
 	retString = retString.replace("&lt;", "<");
 	return retString;
