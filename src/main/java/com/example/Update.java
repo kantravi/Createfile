@@ -51,9 +51,18 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 public class Update extends HttpServlet{
 
 	
-	static final String USERNAME = "charmer@soliantconsulting.com.vip.qa";
-	static final String PASSWORD = "cjhvip2017LcCwLb5ovFvHIPmbLbpAEOHv";
-	static final String AUTHENDPOINT = "https://test.salesforce.com/services/Soap/c/40.0/";
+	/*static final String USERNAME = "charmer@soliantconsulting.com.vip.qa";
+	static final String PASSWORD = "cjhvip2017LcCwLb5ovFvHIPmbLbpAEOHv";*/
+	//static final String USERNAME = "sumit.km@teclever.com.qa";
+	//static final String PASSWORD = "sumit906088D951nwumiM8Chi2f5EcQay8fs";
+	
+	static final String USERNAME = "vipapi@vipmtginc.com";
+	static final String PASSWORD = "Spear@vip20153ZA7AuisoxbbVhx8q3E926Vi";
+	//static final String AUTHENDPOINT = "https://spear--qa.cs54.my.salesforce.com/services/Soap/c/40.0/";
+	static final String AUTHENDPOINT = "https://login.salesforce.com/services/Soap/c/40.0/";
+	
+	//"https://login.salesforce.com/services/Soap/c/40.0";
+
 	static EnterpriseConnection connection;
 
 	@POST
