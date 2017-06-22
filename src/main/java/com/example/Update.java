@@ -49,19 +49,10 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 
 @Path("/setMercuryNetworkStatus")
 public class Update extends HttpServlet{
-
-	
-	/*static final String USERNAME = "charmer@soliantconsulting.com.vip.qa";
-	static final String PASSWORD = "cjhvip2017LcCwLb5ovFvHIPmbLbpAEOHv";*/
-	//static final String USERNAME = "sumit.km@teclever.com.qa";
-	//static final String PASSWORD = "sumit906088D951nwumiM8Chi2f5EcQay8fs";
 	
 	static final String USERNAME = "vipapi@vipmtginc.com";
 	static final String PASSWORD = "Spear@vip20153ZA7AuisoxbbVhx8q3E926Vi";
-	//static final String AUTHENDPOINT = "https://spear--qa.cs54.my.salesforce.com/services/Soap/c/40.0/";
-	static final String AUTHENDPOINT = "https://login.salesforce.com/services/Soap/c/40.0/";
-	
-	//"https://login.salesforce.com/services/Soap/c/40.0";
+	static final String AUTHENDPOINT = "https://login.salesforce.com/services/Soap/c/40.0";
 
 	static EnterpriseConnection connection;
 
@@ -69,6 +60,7 @@ public class Update extends HttpServlet{
 	@Produces(MediaType.TEXT_XML)
 	public String parseXML(String xmlRecords , @Context ServletContext context) throws Exception {
 
+		com.sforce.soap.SpearAppraisalAPI.OrderResponse response = null;
 		String pathPdf = context.getRealPath("/WEB-INF/Appraisal/");
 		System.out.println("pathpdf is :::::" + pathPdf);
 		String decodedValue = "";
@@ -169,6 +161,7 @@ public class Update extends HttpServlet{
 			}//end of if
 
 			com.sforce.soap.SpearAppraisalAPI.SoapConnection soap = com.sforce.soap.SpearAppraisalAPI.Connector.newConnection("","");
+			System.out.println("session is" + config.getSessionId());
 			soap.setSessionHeader(config.getSessionId());
 			System.out.println("**********************************"+config.getServiceEndpoint());
 			
@@ -188,8 +181,10 @@ public class Update extends HttpServlet{
 			System.out.println("xmlString :::::::::" + xmlString);
 			
 			//com.sforce.soap.SpearAppraisalAPI.OrderResponse response = soap.setMercuryNetworkStatus(xmlDataString);///caspers's code
-			com.sforce.soap.SpearAppraisalAPI.OrderResponse response = soap.setMercuryNetworkStatus(xmlString);
-			System.out.println("xmlString :::::::::" + endpointurl); 
+			response = soap.setMercuryNetworkStatus(xmlString);
+			//System.out.println("endpointurl :::::::::" + endpointurl); 
+			//System.out.println("response.getErrorDescription() is" + response.getErrorDescription());
+			
 			String mnNetworkId = response.getErrorDescription().split(" ")[6];
 			String mnResponse = createXMLForRsponse(mnNetworkId);
 			String caseid=response.getErrorDescription().split("&&")[1].split("&&")[0];
@@ -203,7 +198,7 @@ public class Update extends HttpServlet{
 		//return e.printStackTrace();
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
-		return sw.toString();
+		return response.getErrorDescription() + sw.toString();
 		}
 		
 	}
@@ -368,7 +363,7 @@ public class Update extends HttpServlet{
 	     Document createdoc = docBuilder.newDocument();
 	     
 	     NodeList mainNodeList = doc.getElementsByTagName("VALUATION_RESPONSE");
-	     System.out.println("mainNodeList.getLength()" + mainNodeList.getLength());
+	     //System.out.println("mainNodeList.getLength()" + mainNodeList.getLength());
 	     for(int i= 0 ; i < mainNodeList.getLength();i++){//first for
 	    	  Element rootValuationElement = (org.w3c.dom.Element) mainNodeList.item(i);
 	    	  //usableElement.
@@ -403,12 +398,10 @@ public class Update extends HttpServlet{
 	    		 NodeList propertyNodeList = rootValuationElement.getElementsByTagName("PROPERTY");
 	    		 System.out.println("lklk" + propertyNodeList.getLength());
 	    		 for(int j= 0 ; j < propertyNodeList.getLength();j++){//property for
-	    			 System.out.println("888888888888");
 	    			 Element propertyElement = createdoc.createElement("PROPERTY");
 	    			 usableElement = (org.w3c.dom.Element) propertyNodeList.item(j);
 	    			 NodeList structureNodeList = usableElement.getElementsByTagName("STRUCTURE");
 	    			 for(int k = 0 ; k < structureNodeList.getLength();k++){
-	    				 System.out.println("property iff");
 	    				//valuation for
 		    			 usableElement = (org.w3c.dom.Element) structureNodeList.item(k);
 		    			 namedNodeattr = usableElement.getAttributes();
@@ -434,7 +427,7 @@ public class Update extends HttpServlet{
 	    		 }// end of property for 
 	    		 
 	    		 NodeList partyNodeList = rootValuationElement.getElementsByTagName("PARTIES");
-	    		 System.out.println("partyNodeList" + partyNodeList.getLength());
+	    		 //System.out.println("partyNodeList" + partyNodeList.getLength());
 	    		 for(int j= 0 ; j < partyNodeList.getLength();j++){//property for
 	    			 Element partyElement = createdoc.createElement("PARTIES");
 	    			 usableElement = (org.w3c.dom.Element) partyNodeList.item(j);
