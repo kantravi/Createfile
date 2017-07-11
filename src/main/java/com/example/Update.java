@@ -65,13 +65,15 @@ public class Update extends HttpServlet{
 		System.out.println("pathpdf is :::::" + pathPdf);
 		String decodedValue = "";
 		
-		xmlRecords = xmlRecords.replace("%3C", "<");
+		/*xmlRecords = xmlRecords.replace("%3C", "<");
 		xmlRecords = xmlRecords.replace("%3E", ">");
 		xmlRecords = xmlRecords.replace("%2F", "/");
 		xmlRecords = xmlRecords.replace("%3D", "=");
 		xmlRecords = xmlRecords.replace("%27", "\"");
 		xmlRecords = xmlRecords.replace("+", " ");
-		xmlRecords = xmlRecords.replace("%3A", ":");
+		xmlRecords = xmlRecords.replace("%3A", ":");*/
+		
+		xmlRecords = URLDecoder.decode(xmlRecords);
 		
 		 Map<String, String> xmlDataMap = new HashMap<String, String>();
 		 ConnectorConfig config = new ConnectorConfig();
