@@ -5,15 +5,19 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.net.URLDecoder;
+import java.util.Properties;
 
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.ws.rs.POST;
@@ -66,14 +70,6 @@ public class Update extends HttpServlet{
 		System.out.println("pathpdf is :::::" + pathPdf);
 		String decodedValue = "";
 		
-		/*xmlRecords = xmlRecords.replace("%3C", "<");
-		xmlRecords = xmlRecords.replace("%3E", ">");
-		xmlRecords = xmlRecords.replace("%2F", "/");
-		xmlRecords = xmlRecords.replace("%3D", "=");
-		xmlRecords = xmlRecords.replace("%27", "\"");
-		xmlRecords = xmlRecords.replace("+", " ");
-		xmlRecords = xmlRecords.replace("%3A", ":");*/
-		
 		xmlRecords = URLDecoder.decode(xmlRecords);
 		
 		 Map<String, String> xmlDataMap = new HashMap<String, String>();
@@ -81,6 +77,7 @@ public class Update extends HttpServlet{
 		 config.setUsername(USERNAME);
 		 config.setPassword(PASSWORD);
 		 config.setAuthEndpoint(AUTHENDPOINT);
+		 String trackingId = "";
 
 		try {
 
@@ -107,6 +104,7 @@ public class Update extends HttpServlet{
 			if(nodes1.getLength() > 0){
 				Element line2 = (Element) nodes1.item(0);
 				xmlDataMap.put("TRACKINGID", getCharacterDataFromElement(line2));
+				trackingId = getCharacterDataFromElement(line2);
 			}
 
 			NodeList statusNode = doc.getElementsByTagName("STATUSID");
@@ -201,18 +199,73 @@ public class Update extends HttpServlet{
 		//return e.printStackTrace();
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
+		
+		sendEmailToAdminWithTracking(response.getErrorDescription(),sw.toString(),trackingId);
+		
 		return response.getErrorDescription() + sw.toString();
+		}
+		
+	}
+	
+	public static void sendEmailToAdminWithTracking(String errorDesc , String writer,String trackingId){
+		try{
+			
+			final String form1 ="sumit.km@teclever.com"; 
+			final String pwd = "sumit906088";
+			
+			Properties props = new Properties();
+			props.put("mail.smtp.auth", "true");
+    		props.put("mail.smtp.starttls.enable", "true");
+    		props.put("mail.smtp.host", "smtp.gmail.com");
+    		props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+    		props.put("mail.debug.auth", "true");
+			props.put("mail.smtp.port", "587");
+    		props.setProperty("mail.transport.protocol", "smtp");
+    		
+    		
+    		try { 
+    			Authenticator auth = new Authenticator() {
+    				protected PasswordAuthentication getPasswordAuthentication() {
+    					return new PasswordAuthentication(form1, pwd);
+    				}
+    			};
+    			javax.mail.Session session = javax.mail.Session.getInstance(props,auth); 
+    			javax.mail.Transport transport = session.getTransport(); 
+    			transport.connect(); 
+    					Message message = new MimeMessage(session); 
+    					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
+    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
+    					message.setSubject("Heroku/Salesforce Error Log "); 
+    					message.setText(errorDesc+" Tracking Id Being Sent Is :   "+trackingId + writer); 
+    					Transport.send(message);
+    		}catch(Exception ex){
+    			ex.printStackTrace();
+    		}
+			
+			
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
 		}
 		
 	}
 
 	public static String getCharacterDataFromElement(Element e) {
 
-		Node child = e.getFirstChild();
-		if (child instanceof CharacterData) {
-		CharacterData cd = (CharacterData) child;
-		return cd.getData();
+		try{
+			Node child = e.getFirstChild();
+			if (child instanceof CharacterData) {
+			CharacterData cd = (CharacterData) child;
+			return cd.getData();
+			}	
+		}catch(Exception ex){
+			ex.printStackTrace();
+			StringWriter sw = new StringWriter();
+			ex.printStackTrace(new PrintWriter(sw));
+			
+			sendEmailToAdmin("Error While Parsing Request XML Sent By MN",sw.toString());
 		}
+		
 		return "";
 		
 	}
@@ -226,6 +279,12 @@ public class Update extends HttpServlet{
 		//System.out.println(decodesString);
 		}catch(Exception ex){
 		ex.printStackTrace();
+		
+		StringWriter sw = new StringWriter();
+		ex.printStackTrace(new PrintWriter(sw));
+		
+		sendEmailToAdmin("Error While Docoding Encoding Values",sw.toString());
+		
 		}
 		return decodesString;
 		
@@ -321,6 +380,11 @@ public class Update extends HttpServlet{
 		
 	}catch(Exception ex){
 	   ex.printStackTrace();
+	   
+	   StringWriter sw = new StringWriter();
+		ex.printStackTrace(new PrintWriter(sw));
+		
+		sendEmailToAdmin("Error While Creating XML To Send To Salesforce",sw.toString());
 	}
 	retString = retString.replace("&gt;", ">");
 	retString = retString.replace("&lt;", "<");
@@ -337,6 +401,11 @@ public class Update extends HttpServlet{
 		// System.out.println("1111111111111111111111111111" + xml);
 		}catch(Exception ex){
 		ex.printStackTrace();
+		
+		StringWriter sw = new StringWriter();
+		ex.printStackTrace(new PrintWriter(sw));
+		
+		sendEmailToAdmin("Error While Creating XML For Response",sw.toString());
 		}
 		
 		return xml;
@@ -518,6 +587,12 @@ public class Update extends HttpServlet{
 		
 	}catch(Exception ex){
 	ex.printStackTrace();
+	
+	StringWriter sw = new StringWriter();
+	ex.printStackTrace(new PrintWriter(sw));
+	
+	sendEmailToAdmin("Error While Parsing And Creating XML",sw.toString());
+	
 	}
 	
 	return parsedStrin;
@@ -533,6 +608,12 @@ public class Update extends HttpServlet{
 			fop.close();
 		}catch(Exception ex){
 		ex.printStackTrace();
+		
+		StringWriter sw = new StringWriter();
+		ex.printStackTrace(new PrintWriter(sw));
+		
+		sendEmailToAdmin("Error While Creating PDF Files",sw.toString());
+		
 		}
 	}
 	
@@ -571,6 +652,10 @@ public class Update extends HttpServlet{
 		     returnResponse = printXmlDocument(createdoc);
 		}catch(Exception ex){
 			ex.printStackTrace();
+			StringWriter sw = new StringWriter();
+			ex.printStackTrace(new PrintWriter(sw));
+			
+			sendEmailToAdmin("Error While Creating XML For Response",sw.toString());
 		}
 		return returnResponse;
 	}
@@ -610,8 +695,59 @@ public class Update extends HttpServlet{
 		catch (Exception e)
 		{
 		e.printStackTrace();
+		
+		StringWriter sw = new StringWriter();
+		e.printStackTrace(new PrintWriter(sw));
+		
+		sendEmailToAdmin("Error While Posting PDF Into Chatter",sw.toString());
+		}
+		
+	}
+	
+	public static void sendEmailToAdmin(String errorDesc , String writer){
+		try{
+			
+			final String form1 ="sumit.km@teclever.com"; 
+			final String pwd = "sumit906088";
+			
+			Properties props = new Properties();
+			props.put("mail.smtp.auth", "true");
+    		props.put("mail.smtp.starttls.enable", "true");
+    		props.put("mail.smtp.host", "smtp.gmail.com");
+    		props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+    		props.put("mail.debug.auth", "true");
+			props.put("mail.smtp.port", "587");
+    		props.setProperty("mail.transport.protocol", "smtp");
+    		
+    		
+    		try { 
+    			Authenticator auth = new Authenticator() {
+    				protected PasswordAuthentication getPasswordAuthentication() {
+    					return new PasswordAuthentication(form1, pwd);
+    				}
+    			};
+    			javax.mail.Session session = javax.mail.Session.getInstance(props,auth); 
+    			javax.mail.Transport transport = session.getTransport(); 
+    			transport.connect(); 
+    					Message message = new MimeMessage(session); 
+    					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
+    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
+    					
+    					message.setSubject("Heroku/Salesforce Error Log "); 
+    					message.setText(errorDesc+writer); 
+    					Transport.send(message);
+    		}catch(Exception ex){
+    			ex.printStackTrace();
+    		}
+			
+			
+			
+		}catch(Exception ex){
+			ex.printStackTrace();
 		}
 		
 	}
 
 }
+
+
