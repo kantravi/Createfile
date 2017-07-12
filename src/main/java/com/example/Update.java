@@ -55,6 +55,8 @@ import com.thoughtworks.xstream.io.xml.DomDriver;
 @Path("/setMercuryNetworkStatus")
 public class Update extends HttpServlet{
 	
+	static Map<String,String> testMap = new HashMap<String,String>();
+	
 	static final String USERNAME = "vipapi@vipmtginc.com";
 	static final String PASSWORD = "Spear@vip20153ZA7AuisoxbbVhx8q3E926Vi";
 	static final String AUTHENDPOINT = "https://login.salesforce.com/services/Soap/c/40.0";
@@ -77,7 +79,6 @@ public class Update extends HttpServlet{
 		 config.setUsername(USERNAME);
 		 config.setPassword(PASSWORD);
 		 config.setAuthEndpoint(AUTHENDPOINT);
-		 String trackingId = "";
 
 		try {
 
@@ -92,37 +93,44 @@ public class Update extends HttpServlet{
 			if(loanNodes.getLength() > 0){
 				Element loanElm = (Element) loanNodes.item(0);
 				xmlDataMap.put("LOANNUMBER", getCharacterDataFromElement(loanElm));
+				testMap.put("LOANNUMBER", getCharacterDataFromElement(loanElm));
+				
 			}
 			
 			NodeList stNodes = doc.getElementsByTagName("STATUSNAME");
 			if(stNodes.getLength() > 0){
 				Element stElm = (Element) stNodes.item(0);
 				xmlDataMap.put("STATUSNAME", getCharacterDataFromElement(stElm));
+				System.out.println("getCharacterDataFromElement(stElm)" + getCharacterDataFromElement(stElm));
+				testMap.put("STATUSNAME", getCharacterDataFromElement(stElm));
 			}
 
 			NodeList nodes1 = doc.getElementsByTagName("TRACKINGID");
 			if(nodes1.getLength() > 0){
 				Element line2 = (Element) nodes1.item(0);
 				xmlDataMap.put("TRACKINGID", getCharacterDataFromElement(line2));
-				trackingId = getCharacterDataFromElement(line2);
+				testMap.put("TRACKINGID", getCharacterDataFromElement(line2));
 			}
 
 			NodeList statusNode = doc.getElementsByTagName("STATUSID");
 			if(statusNode.getLength() > 0){
 				Element statusElement = (Element) statusNode.item(0);
 				xmlDataMap.put("STATUSID", getCharacterDataFromElement(statusElement));
+				testMap.put("STATUSID", getCharacterDataFromElement(statusElement));
 			}
 
 			NodeList statusTSNode = doc.getElementsByTagName("STATUSTIMESTAMP");
 			if(statusTSNode.getLength() > 0){
 				Element statusTSElement = (Element) statusTSNode.item(0);
 				xmlDataMap.put("STATUSTIMESTAMP", getCharacterDataFromElement(statusTSElement));
+				testMap.put("STATUSTIMESTAMP", getCharacterDataFromElement(statusTSElement));
 			}
 			
 			NodeList dueDateNode = doc.getElementsByTagName("DUEDATE");
 			if(dueDateNode.getLength() > 0){
 				Element dueDateElement = (Element) dueDateNode.item(0);
 				xmlDataMap.put("DUEDATE", getCharacterDataFromElement(dueDateElement));
+				testMap.put("DUEDATE", getCharacterDataFromElement(dueDateElement));
 			}
 			
 			
@@ -130,6 +138,7 @@ public class Update extends HttpServlet{
 			NodeList nodes = doc.getElementsByTagName("STATUSCOMMENT");
 			Element line1 = (Element) nodes.item(0);
 			xmlDataMap.put("STATUSCOMMENTTEXT", getCharacterDataFromElement(line1));
+			testMap.put("STATUSCOMMENTTEXT", getCharacterDataFromElement(line1));
 			//System.out.println("Statuscomment body is : " + getCharacterDataFromElement(line1));
 			
 			for (int i = 0; i < nodes.getLength(); i++) {
@@ -200,18 +209,25 @@ public class Update extends HttpServlet{
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
 		
-		sendEmailToAdminWithTracking(response.getErrorDescription(),sw.toString(),trackingId);
+		sendEmailToAdminWithTracking(response.getErrorDescription(),xmlDataMap);
 		
 		return response.getErrorDescription() + sw.toString();
 		}
 		
 	}
 	
-	public static void sendEmailToAdminWithTracking(String errorDesc , String writer,String trackingId){
+	public static void sendEmailToAdminWithTracking(String errorDesc , Map<String,String> xmlDataMap){
 		try{
-			
+			System.out.println("sending emil from top");
 			final String form1 ="sumit.km@teclever.com"; 
 			final String pwd = "sumit906088";
+            String loanNumber = "";
+            String statusName = "";
+            String trackingId = "";
+            String statusId = "";
+            String statusTimeStamp = "";
+            String dueDate = "";
+            String statusComment = "";
 			
 			Properties props = new Properties();
 			props.put("mail.smtp.auth", "true");
@@ -221,6 +237,28 @@ public class Update extends HttpServlet{
     		props.put("mail.debug.auth", "true");
 			props.put("mail.smtp.port", "587");
     		props.setProperty("mail.transport.protocol", "smtp");
+    		
+    		if(xmlDataMap.containsKey("LOANNUMBER")){
+   			 loanNumber = xmlDataMap.get("LOANNUMBER");
+   		    }
+	   	    if(xmlDataMap.containsKey("STATUSNAME")){
+	   	   	 statusName = xmlDataMap.get("STATUSNAME");
+	   	    }
+	   	    if(xmlDataMap.containsKey("TRACKINGID")){
+	   	   	 trackingId = xmlDataMap.get("TRACKINGID");
+	   	    }
+	   	    if(xmlDataMap.containsKey("STATUSID")){
+	   	   	 statusId = xmlDataMap.get("STATUSID");
+	   	    }
+	   	    if(xmlDataMap.containsKey("STATUSTIMESTAMP")){
+	   	   	 statusTimeStamp = xmlDataMap.get("STATUSTIMESTAMP");
+	   	    }
+	   	    if(xmlDataMap.containsKey("DUEDATE")){
+	   		   	 dueDate = xmlDataMap.get("DUEDATE");
+	   	    }
+	   		if(xmlDataMap.containsKey("STATUSCOMMENTTEXT")){
+	   			statusComment = xmlDataMap.get("STATUSCOMMENTTEXT");
+	   		}
     		
     		
     		try { 
@@ -234,9 +272,13 @@ public class Update extends HttpServlet{
     			transport.connect(); 
     					Message message = new MimeMessage(session); 
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
-    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
-    					message.setSubject("Heroku/Salesforce Error Log "); 
-    					message.setText(errorDesc+" Tracking Id Being Sent Is :   "+trackingId + writer); 
+    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("smodi247@gmail.com"));
+    					message.setSubject("Error Occured While Accessing Heroku App."); 
+    					message.setText(errorDesc+". \n Tracking Id Being Sent Is : "+trackingId +"\n LoanNumber : " + loanNumber+"\n StatusId : "+statusId+"\n StatusName : " + statusName+"\n DueDate : "+ dueDate +"\n StatusTimeStamp : "+ statusTimeStamp + "\n StatusComment : " + statusComment ); 
+    					
+    					/*msg.setText("Dear Mail Crawler,"  pavlel@vipmtginc.com
+    							+ "\n\n No spam to my email, please!");
+    					*/
     					Transport.send(message);
     		}catch(Exception ex){
     			ex.printStackTrace();
@@ -260,10 +302,8 @@ public class Update extends HttpServlet{
 			}	
 		}catch(Exception ex){
 			ex.printStackTrace();
-			StringWriter sw = new StringWriter();
-			ex.printStackTrace(new PrintWriter(sw));
 			
-			sendEmailToAdmin("Error While Parsing Request XML Sent By MN",sw.toString());
+			sendEmailToAdmin("Error While Parsing Request XML Sent By MN");
 		}
 		
 		return "";
@@ -279,11 +319,7 @@ public class Update extends HttpServlet{
 		//System.out.println(decodesString);
 		}catch(Exception ex){
 		ex.printStackTrace();
-		
-		StringWriter sw = new StringWriter();
-		ex.printStackTrace(new PrintWriter(sw));
-		
-		sendEmailToAdmin("Error While Docoding Encoding Values",sw.toString());
+		sendEmailToAdmin("Error Occured While Docoding Encoded XML String Document Values");
 		
 		}
 		return decodesString;
@@ -380,11 +416,8 @@ public class Update extends HttpServlet{
 		
 	}catch(Exception ex){
 	   ex.printStackTrace();
-	   
-	   StringWriter sw = new StringWriter();
-		ex.printStackTrace(new PrintWriter(sw));
 		
-		sendEmailToAdmin("Error While Creating XML To Send To Salesforce",sw.toString());
+		sendEmailToAdmin("Error Occured While Creating XML File To Send To Salesforce");
 	}
 	retString = retString.replace("&gt;", ">");
 	retString = retString.replace("&lt;", "<");
@@ -402,10 +435,7 @@ public class Update extends HttpServlet{
 		}catch(Exception ex){
 		ex.printStackTrace();
 		
-		StringWriter sw = new StringWriter();
-		ex.printStackTrace(new PrintWriter(sw));
-		
-		sendEmailToAdmin("Error While Creating XML For Response",sw.toString());
+		sendEmailToAdmin("Error Occured While Coverting XML File Into String");
 		}
 		
 		return xml;
@@ -588,10 +618,7 @@ public class Update extends HttpServlet{
 	}catch(Exception ex){
 	ex.printStackTrace();
 	
-	StringWriter sw = new StringWriter();
-	ex.printStackTrace(new PrintWriter(sw));
-	
-	sendEmailToAdmin("Error While Parsing And Creating XML",sw.toString());
+	sendEmailToAdmin("Error Occured While Parsing And Creating Encoded XML File");
 	
 	}
 	
@@ -609,10 +636,7 @@ public class Update extends HttpServlet{
 		}catch(Exception ex){
 		ex.printStackTrace();
 		
-		StringWriter sw = new StringWriter();
-		ex.printStackTrace(new PrintWriter(sw));
-		
-		sendEmailToAdmin("Error While Creating PDF Files",sw.toString());
+		sendEmailToAdmin("Error Occured While Creating PDF Files.");
 		
 		}
 	}
@@ -652,10 +676,7 @@ public class Update extends HttpServlet{
 		     returnResponse = printXmlDocument(createdoc);
 		}catch(Exception ex){
 			ex.printStackTrace();
-			StringWriter sw = new StringWriter();
-			ex.printStackTrace(new PrintWriter(sw));
-			
-			sendEmailToAdmin("Error While Creating XML For Response",sw.toString());
+			sendEmailToAdmin("Error Occured While Creating XML File For Response");
 		}
 		return returnResponse;
 	}
@@ -699,16 +720,23 @@ public class Update extends HttpServlet{
 		StringWriter sw = new StringWriter();
 		e.printStackTrace(new PrintWriter(sw));
 		
-		sendEmailToAdmin("Error While Posting PDF Into Chatter",sw.toString());
+		sendEmailToAdmin("Error Occured While Posting PDF File Into Case Chatter");
 		}
 		
 	}
 	
-	public static void sendEmailToAdmin(String errorDesc , String writer){
+	public static void sendEmailToAdmin(String errorDesc){
 		try{
-			
+			System.out.println("send  email fro bottom");
 			final String form1 ="sumit.km@teclever.com"; 
 			final String pwd = "sumit906088";
+            String loanNumber = "";
+            String statusName = "";
+            String trackingId = "";
+            String statusId = "";
+            String statusTimeStamp = "";
+            String dueDate = "";
+            String statusComment = "";
 			
 			Properties props = new Properties();
 			props.put("mail.smtp.auth", "true");
@@ -718,6 +746,28 @@ public class Update extends HttpServlet{
     		props.put("mail.debug.auth", "true");
 			props.put("mail.smtp.port", "587");
     		props.setProperty("mail.transport.protocol", "smtp");
+    		
+    		if(testMap.containsKey("LOANNUMBER")){
+   			 loanNumber = testMap.get("LOANNUMBER");
+   		    }
+	   	    if(testMap.containsKey("STATUSNAME")){
+	   	   	 statusName = testMap.get("STATUSNAME");
+	   	    }
+	   	    if(testMap.containsKey("TRACKINGID")){
+	   	   	 trackingId = testMap.get("TRACKINGID");
+	   	    }
+	   	    if(testMap.containsKey("STATUSID")){
+	   	   	 statusId = testMap.get("STATUSID");
+	   	    }
+	   	    if(testMap.containsKey("STATUSTIMESTAMP")){
+	   	   	 statusTimeStamp = testMap.get("STATUSTIMESTAMP");
+	   	    }
+	   	    if(testMap.containsKey("DUEDATE")){
+	   		   	 dueDate = testMap.get("DUEDATE");
+	   	    }
+	   		if(testMap.containsKey("STATUSCOMMENTTEXT")){
+	   			statusComment = testMap.get("STATUSCOMMENTTEXT");
+	   		}
     		
     		
     		try { 
@@ -731,10 +781,13 @@ public class Update extends HttpServlet{
     			transport.connect(); 
     					Message message = new MimeMessage(session); 
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
-    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
+    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("smodi247@gmail.com"));
+    					message.setSubject("Error Occured While Accessing Heroku App. "); 
+    					message.setText(errorDesc+". \n Tracking Id Being Sent Is : "+trackingId +"\n LoanNumber : " + loanNumber+"\n StatusId : "+statusId+"\n StatusName : " + statusName+"\n DueDate : "+ dueDate +"\n StatusTimeStamp : "+ statusTimeStamp + "\n StatusComment : " + statusComment ); 
     					
-    					message.setSubject("Heroku/Salesforce Error Log "); 
-    					message.setText(errorDesc+writer); 
+    					/*msg.setText("Dear Mail Crawler,"  pavlel@vipmtginc.com
+    							+ "\n\n No spam to my email, please!");
+    					*/
     					Transport.send(message);
     		}catch(Exception ex){
     			ex.printStackTrace();
