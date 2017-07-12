@@ -272,7 +272,7 @@ public class Update extends HttpServlet{
     			transport.connect(); 
     					Message message = new MimeMessage(session); 
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
-    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("smodi247@gmail.com"));
+    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
     					message.setSubject("Error Occured While Accessing Heroku App."); 
     					message.setText(errorDesc+". \n Tracking Id Being Sent Is : "+trackingId +"\n LoanNumber : " + loanNumber+"\n StatusId : "+statusId+"\n StatusName : " + statusName+"\n DueDate : "+ dueDate +"\n StatusTimeStamp : "+ statusTimeStamp + "\n StatusComment : " + statusComment ); 
     					
@@ -781,7 +781,7 @@ public class Update extends HttpServlet{
     			transport.connect(); 
     					Message message = new MimeMessage(session); 
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
-    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("smodi247@gmail.com"));
+    					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
     					message.setSubject("Error Occured While Accessing Heroku App. "); 
     					message.setText(errorDesc+". \n Tracking Id Being Sent Is : "+trackingId +"\n LoanNumber : " + loanNumber+"\n StatusId : "+statusId+"\n StatusName : " + statusName+"\n DueDate : "+ dueDate +"\n StatusTimeStamp : "+ statusTimeStamp + "\n StatusComment : " + statusComment ); 
     					
