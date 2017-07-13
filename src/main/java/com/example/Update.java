@@ -273,8 +273,8 @@ public class Update extends HttpServlet{
     					Message message = new MimeMessage(session); 
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
     					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
-    					message.setSubject("Error Occured While Accessing Heroku App."); 
-    					message.setText(errorDesc+". \n Tracking Id Being Sent Is : "+trackingId +"\n LoanNumber : " + loanNumber+"\n StatusId : "+statusId+"\n StatusName : " + statusName+"\n DueDate : "+ dueDate +"\n StatusTimeStamp : "+ statusTimeStamp + "\n StatusComment : " + statusComment ); 
+    					message.setSubject("Heroku/Salesforce Error Log."); 
+    					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment ); 
     					
     					/*msg.setText("Dear Mail Crawler,"  pavlel@vipmtginc.com
     							+ "\n\n No spam to my email, please!");
@@ -783,7 +783,7 @@ public class Update extends HttpServlet{
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
     					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
     					message.setSubject("Error Occured While Accessing Heroku App. "); 
-    					message.setText(errorDesc+". \n Tracking Id Being Sent Is : "+trackingId +"\n LoanNumber : " + loanNumber+"\n StatusId : "+statusId+"\n StatusName : " + statusName+"\n DueDate : "+ dueDate +"\n StatusTimeStamp : "+ statusTimeStamp + "\n StatusComment : " + statusComment ); 
+    					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment ); 
     					
     					/*msg.setText("Dear Mail Crawler,"  pavlel@vipmtginc.com
     							+ "\n\n No spam to my email, please!");
