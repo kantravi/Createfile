@@ -13,11 +13,15 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.mail.Authenticator;
+import javax.mail.BodyPart;
 import javax.mail.Message;
+import javax.mail.Multipart;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.ws.rs.POST;
@@ -34,6 +38,7 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
+import org.apache.commons.lang.StringEscapeUtils;
 import org.w3c.dom.Attr;
 import org.w3c.dom.CharacterData;
 import org.w3c.dom.Document;
@@ -73,6 +78,7 @@ public class Update extends HttpServlet{
 		String decodedValue = "";
 		
 		xmlRecords = URLDecoder.decode(xmlRecords);
+		xmlRecords = StringEscapeUtils.unescapeHtml(xmlRecords);
 		
 		 Map<String, String> xmlDataMap = new HashMap<String, String>();
 		 ConnectorConfig config = new ConnectorConfig();
@@ -101,6 +107,8 @@ public class Update extends HttpServlet{
 			if(stNodes.getLength() > 0){
 				Element stElm = (Element) stNodes.item(0);
 				xmlDataMap.put("STATUSNAME", getCharacterDataFromElement(stElm));
+				System.out.println(getCharacterDataFromElement(stElm));
+				
 				System.out.println("getCharacterDataFromElement(stElm)" + getCharacterDataFromElement(stElm));
 				testMap.put("STATUSNAME", getCharacterDataFromElement(stElm));
 			}
@@ -137,9 +145,9 @@ public class Update extends HttpServlet{
 			
 			NodeList nodes = doc.getElementsByTagName("STATUSCOMMENT");
 			Element line1 = (Element) nodes.item(0);
-			xmlDataMap.put("STATUSCOMMENTTEXT", getCharacterDataFromElement(line1));
-			testMap.put("STATUSCOMMENTTEXT", getCharacterDataFromElement(line1));
-			//System.out.println("Statuscomment body is : " + getCharacterDataFromElement(line1));
+			xmlDataMap.put("STATUSCOMMENTTEXT", StringEscapeUtils.unescapeHtml(getCharacterDataFromElement(line1)));
+			testMap.put("STATUSCOMMENTTEXT", StringEscapeUtils.unescapeHtml(getCharacterDataFromElement(line1)));
+			System.out.println("Statuscomment body is : " + getCharacterDataFromElement(line1));
 			
 			for (int i = 0; i < nodes.getLength(); i++) {
 			Element element = (Element) nodes.item(i);
@@ -236,6 +244,8 @@ public class Update extends HttpServlet{
     		props.put("mail.smtp.ssl.trust", "smtp.gmail.com");
     		props.put("mail.debug.auth", "true");
 			props.put("mail.smtp.port", "587");
+			
+			
     		props.setProperty("mail.transport.protocol", "smtp");
     		
     		if(xmlDataMap.containsKey("LOANNUMBER")){
@@ -271,11 +281,17 @@ public class Update extends HttpServlet{
     			javax.mail.Transport transport = session.getTransport(); 
     			transport.connect(); 
     					Message message = new MimeMessage(session); 
+    					String body = errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment+"\r" ;
+    					BodyPart messageBodyPart = new MimeBodyPart();
+    					messageBodyPart.setText(body);
+    					Multipart multipart = new MimeMultipart();
+						multipart.addBodyPart(messageBodyPart);
+    					
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
     					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
     					message.setSubject("Heroku/Salesforce Error Log."); 
-    					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment ); 
-    					
+    					//message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment+"\r" ); 
+    					message.setContent(multipart);
     					/*msg.setText("Dear Mail Crawler,"  pavlel@vipmtginc.com
     							+ "\n\n No spam to my email, please!");
     					*/
@@ -783,11 +799,9 @@ public class Update extends HttpServlet{
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
     					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
     					message.setSubject("Error Occured While Accessing Heroku App. "); 
-    					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment ); 
+    					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment+"\r" ); 
     					
-    					/*msg.setText("Dear Mail Crawler,"  pavlel@vipmtginc.com
-    							+ "\n\n No spam to my email, please!");
-    					*/
+    					
     					Transport.send(message);
     		}catch(Exception ex){
     			ex.printStackTrace();
