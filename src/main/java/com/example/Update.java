@@ -281,7 +281,7 @@ public class Update extends HttpServlet{
     			javax.mail.Transport transport = session.getTransport(); 
     			transport.connect(); 
     					Message message = new MimeMessage(session); 
-    					String body = errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment+"\r" ;
+    					String body = errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\r\nStatusComment : " + statusComment+"\r" ;
     					BodyPart messageBodyPart = new MimeBodyPart();
     					messageBodyPart.setText(body);
     					Multipart multipart = new MimeMultipart();
@@ -799,7 +799,7 @@ public class Update extends HttpServlet{
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
     					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
     					message.setSubject("Error Occured While Accessing Heroku App. "); 
-    					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\rStatusComment : " + statusComment+"\r" ); 
+    					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\r\nStatusComment : " + statusComment+"\r" ); 
     					
     					
     					Transport.send(message);
