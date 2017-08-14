@@ -79,6 +79,7 @@ public class Update extends HttpServlet{
 		
 		xmlRecords = URLDecoder.decode(xmlRecords);
 		xmlRecords = StringEscapeUtils.unescapeHtml(xmlRecords);
+		xmlRecords = xmlRecords.replace("&", "&amp;");
 		
 		 Map<String, String> xmlDataMap = new HashMap<String, String>();
 		 ConnectorConfig config = new ConnectorConfig();
@@ -798,7 +799,7 @@ public class Update extends HttpServlet{
     					Message message = new MimeMessage(session); 
     					message.setFrom(new InternetAddress("sumit.km@teclever.com"));
     					message.setRecipients(Message.RecipientType.TO,InternetAddress.parse("pavlel@vipmtginc.com"));
-    					message.setSubject("Error Occured While Accessing Heroku App. "); 
+    					message.setSubject("Heroku/Salesforce Error Log. "); 
     					message.setText(errorDesc+".\rTracking Id Being Sent Is : "+trackingId +"\rLoanNumber : " + loanNumber+"\rStatusId : "+statusId+"\rStatusName : " + statusName+"\rDueDate : "+ dueDate +"\rStatusTimeStamp : "+ statusTimeStamp + "\r\nStatusComment : " + statusComment+"\r" ); 
     					
     					
